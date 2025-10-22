@@ -24,9 +24,9 @@ Think of it like "Clipper" or "Ditto," but cleaner and yours.
 
 ## Installation
 
-### Option 1: Pre-built Binaries (Recommended)
+### Option 1: Pre-built Binaries
 
-#### Windows
+#### Windows (Recommended)
 
 1. Download `ClipboardManager.exe` from the [Releases](https://github.com/Ratul345/Clipboard-Manager/releases) page
 2. Run the executable - no installation required!
@@ -34,27 +34,9 @@ Think of it like "Clipper" or "Ditto," but cleaner and yours.
 
 #### Linux
 
-**Using .deb package (Ubuntu/Debian):**
-```bash
-# Download the .deb file from Releases
-sudo dpkg -i clipboard-manager_1.0.0_amd64.deb
+**Pre-built binaries for Linux are not yet available.** Please use Option 2 (From Source) below.
 
-# If there are dependency issues:
-sudo apt-get install -f
-```
-
-**Using standalone executable:**
-```bash
-# Download clipboard-manager from Releases
-chmod +x clipboard-manager
-./clipboard-manager
-```
-
-**System-wide installation:**
-```bash
-sudo cp clipboard-manager /usr/local/bin/
-sudo cp clipboard-manager.desktop /usr/share/applications/
-```
+> **Note:** Linux users can run the application from source code. Pre-built Linux binaries may be added in future releases if there's demand.
 
 ### Option 2: From Source
 
