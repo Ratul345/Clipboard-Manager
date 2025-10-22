@@ -1,182 +1,105 @@
 # Clipboard Manager - Release Notes
 
-## Version 1.0.0 - Initial Release
+## Version 1.1.0 - UI Redesign
 
-### Overview
+**Release Date:** October 23, 2025
 
-Clipboard Manager is a cross-platform desktop application that captures and stores your clipboard history (text, links, and images), allowing you to search, browse, and reuse previously copied items.
+### What's New
 
-### Features
+This release brings a complete visual overhaul inspired by Windows 11's modern design language, making Clipboard Manager more beautiful and intuitive to use.
 
-#### Core Functionality
-- ✅ **Automatic Clipboard Monitoring** - Captures everything you copy in real-time
-- ✅ **Multi-Format Support** - Handles text, URLs, and images
-- ✅ **Smart Link Detection** - Automatically identifies and tags URLs
-- ✅ **Persistent Storage** - SQLite database keeps history across sessions
-- ✅ **Image Storage** - Saves copied images to local filesystem
+### UI/UX Improvements
 
-#### User Interface
-- ✅ **Clean, Modern GUI** - Built with PyQt5
-- ✅ **Real-Time Search** - Fast, case-insensitive filtering
-- ✅ **Item Cards** - Visual display with icons, previews, and timestamps
-- ✅ **Keyboard Navigation** - Full keyboard support (arrows, Enter, Delete, Escape)
-- ✅ **System Tray Integration** - Runs quietly in background
+#### Modern Windows 11 Design
+- **Frameless Window** - Sleek borderless design with custom title bar
+- **Rounded Corners** - Smooth 12px border-radius throughout the interface
+- **Custom Title Bar** - Draggable brand-colored header with integrated controls
+- **Fluent Design** - Mica-inspired translucent backgrounds and layered effects
 
-#### Customization
-- ✅ **Settings Window** - Configure all preferences
-- ✅ **Global Hotkey** - Default Ctrl+Shift+V (customizable)
-- ✅ **Auto-Start** - Launch on system boot
-- ✅ **Storage Limits** - Configure max items (default: 1000)
-- ✅ **Capture Filters** - Toggle text, images, and links independently
+#### Enhanced Main Window
+- **Larger Canvas** - Increased to 450x650px for better content visibility
+- **Improved Search Bar** - Modern rounded design with integrated search icon
+- **Better Spacing** - Consistent 8-12px grid system for cleaner layout
+- **Custom Scrollbar** - Minimal, rounded scrollbar that blends seamlessly
+- **Items Counter** - Shows total number of clipboard items at a glance
 
-#### Cross-Platform
-- ✅ **Windows Support** - Windows 10 and 11
-- ✅ **Linux Support** - X11 and Wayland display servers
-- ✅ **Platform-Specific Optimizations** - Native clipboard APIs
+#### Refined Item Cards
+- **Smoother Borders** - Lighter colors (#E5E5E5) for subtle separation
+- **Better Selection States** - Light blue background (#E8F4FD) when selected
+- **Enhanced Hover Effects** - Smooth transitions with brand color accents
+- **Improved Delete Button** - Larger, more accessible with better visual feedback
 
-### Installation
+#### Settings Window Redesign
+- **Consistent Styling** - Matches main window's modern aesthetic
+- **Better Organization** - Cleaner layout with improved spacing
+- **Touch-Friendly** - 40px minimum height for all interactive elements
 
-#### Windows
-- Download `ClipboardManager.exe` from releases
-- Run directly - no installation required
-- Optional: Add to Startup folder for auto-start
+### Visual Design System
 
-#### Linux
-- Download `.deb` package for Ubuntu/Debian
-- Or use standalone executable
-- System tray support for GNOME, KDE, XFCE
+#### Color Palette
+- **Brand Blue**: #2B7FD8 (primary actions and accents)
+- **Light Blue**: #E8F4FD (selection states)
+- **Background**: #F3F3F3 (main container)
+- **White**: #FFFFFF (cards and inputs)
+- **Text**: #1F1F1F (primary), #666666 (secondary)
+- **Danger**: #D13438 (delete actions)
+
+#### Typography
+- **Font**: Segoe UI (Windows 11 default)
+- **Sizes**: 12-14px with proper hierarchy
+- **Icons**: Modern emoji-based icons
+
+### User Experience Enhancements
+
+- **Draggable Title Bar** - Click and drag anywhere on the blue header to move window
+- **Visual Feedback** - All interactive elements respond to hover and click
+- **Smooth Animations** - Subtle transitions for state changes
+- **Better Contrast** - Improved readability with optimized color choices
+- **Pointer Cursors** - Clear indication of clickable elements
+
+### Technical Details
+
+- All core functionality remains unchanged
+- No breaking changes to data storage or configuration
+- Backward compatible with v1.0.0 settings and database
+- Performance optimizations for smoother UI rendering
+
+### Upgrade Notes
+
+- Simply replace your existing executable with the new version
+- All your clipboard history and settings will be preserved
+- No manual migration required
 
 ### System Requirements
 
-#### Minimum Requirements
-- **OS:** Windows 10+ or Linux (X11/Wayland)
-- **RAM:** 100MB
-- **Disk:** 50MB + storage for clipboard history
-- **Python:** 3.8+ (for source installation)
+Same as v1.0.0:
+- **Windows**: 10 or 11
+- **Linux**: X11 or Wayland
+- **RAM**: 100MB minimum
+- **Disk**: 50MB + clipboard history storage
 
-#### Recommended
-- **OS:** Windows 11 or Ubuntu 22.04 LTS
-- **RAM:** 200MB
-- **Disk:** 500MB for extensive history
+### Known Issues
 
-### What's Included
+None reported. All v1.0.0 functionality working as expected.
 
-#### Application Files
-- Main executable (Windows: `ClipboardManager.exe`, Linux: `clipboard-manager`)
-- Application icons (Windows: `.ico`, Linux: `.png`)
-- Content type icons (text, link, image)
+### What's Next
 
-#### Documentation
-- README.md - User guide and installation instructions
-- TESTING_CHECKLIST.md - Comprehensive testing checklist
-- TEST_RESULTS.md - Test results and coverage
-- Build scripts and packaging tools
-
-#### Source Code
-- Complete Python source code
-- PyInstaller spec files for building
-- Build scripts for Windows and Linux
-- Icon generation script
-
-### Known Limitations
-
-1. **Screenshot Note:** Application screenshots not yet included in documentation
-2. **Linux Testing:** Full testing on all Linux distributions pending
-3. **Wayland Support:** May have limited functionality on some Wayland compositors
-4. **Global Hotkeys:** Require appropriate permissions on some systems
-
-### Performance
-
-- Clipboard detection latency: <500ms
-- Search response time: <100ms for 1000 items
-- Memory usage: <100MB with 1000 items
-- Startup time: <2 seconds
-
-### Security & Privacy
-
-- ✅ All data stored locally only
-- ✅ No network connections
-- ✅ No telemetry or analytics
-- ✅ User controls what is captured
-- ✅ Easy data deletion (individual or all)
-
-### Building from Source
-
-See `build_scripts/README.md` for detailed instructions.
-
-**Quick build:**
-```bash
-# Windows
-pip install pyinstaller
-build_scripts\build_windows.bat
-
-# Linux
-pip install pyinstaller
-./build_scripts/build_linux.sh
-```
-
-### Testing
-
-#### Automated Tests
-- 23 unit tests covering core functionality
-- All tests passing on Windows
-- Cross-platform test suite included
-
-#### Manual Testing
-- Comprehensive testing checklist provided
-- Windows functionality verified
-- Linux testing pending user feedback
-
-### Roadmap
-
-#### Planned for Future Releases
+Future releases may include:
 - Dark theme support
 - Pin favorite items
 - Categories and tags
-- Export/import history
-- Exclude specific applications
-- Rich text formatting preservation
-- Cloud sync (optional)
-- Mobile companion app
-
-### Credits
-
-Inspired by clipboard managers like Ditto, Clipper, and CopyQ.
-
-Built with:
-- PyQt5 - GUI framework
-- pystray - System tray integration
-- Pillow - Image processing
-- SQLite - Database storage
-
-### License
-
-MIT License - See LICENSE file for details
-
-### Support
-
-- Documentation: See README.md
-- Issues: GitHub Issues
-- Logs: `~/.clipboard-manager/app.log`
-
-### Changelog
-
-#### Version 1.0.0 (2025-10-22)
-- Initial release
-- Core clipboard monitoring functionality
-- Text, link, and image support
-- Search and filtering
-- System tray integration
-- Global hotkey support
-- Settings window
-- Auto-start functionality
-- Cross-platform support (Windows & Linux)
-- Persistent storage
-- Complete documentation
-- Build and packaging scripts
+- Export/import functionality
 
 ---
 
+## Version 1.0.0 - Initial Release
+
 **Release Date:** October 22, 2025
-**Status:** Production Ready
-**Platforms:** Windows 10+, Linux (X11/Wayland)
+
+Initial release with core clipboard monitoring, search, and storage functionality. See previous release notes for full v1.0.0 feature list.
+
+---
+
+**Download:** [Latest Release](https://github.com/Ratul345/Clipboard-Manager/releases)
+**Support:** Check logs at `~/.clipboard-manager/app.log`
+**License:** MIT

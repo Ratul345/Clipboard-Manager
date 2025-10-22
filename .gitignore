@@ -20,7 +20,7 @@ ENV/
 *~
 .DS_Store
 
-# Kiro IDE (development specs - not needed for open source users)
+# Kiro IDE
 .kiro/
 
 # Application Data (user-generated)
@@ -78,6 +78,8 @@ assets/icons/create_icons.py
 # Development/Release documentation (not needed in repo)
 PRE_PUBLISH_CHECKLIST.md
 GITHUB_RELEASE.md
+UI_REDESIGN_NOTES.md
+VERSION_MANAGEMENT.md
 
 # Build artifacts
 *.exe

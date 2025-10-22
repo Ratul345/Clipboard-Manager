@@ -99,19 +99,20 @@ class ItemCard(QWidget):
         
         # Delete button
         delete_button = QPushButton("🗑️")
-        delete_button.setFixedSize(30, 30)
+        delete_button.setFixedSize(32, 32)
         delete_button.setFont(QFont("Segoe UI Emoji", 12))
+        delete_button.setCursor(Qt.PointingHandCursor)
         delete_button.setStyleSheet("""
             QPushButton {
                 background-color: transparent;
                 border: none;
-                border-radius: 15px;
+                border-radius: 6px;
             }
             QPushButton:hover {
-                background-color: #ffebee;
+                background-color: #FFE6E6;
             }
             QPushButton:pressed {
-                background-color: #ffcdd2;
+                background-color: #FFCCCC;
             }
         """)
         delete_button.clicked.connect(self._on_delete_clicked)
@@ -258,23 +259,24 @@ class ItemCard(QWidget):
         if self.is_selected:
             self.setStyleSheet("""
                 ItemCard {
-                    background-color: #e3f2fd;
-                    border: 2px solid #2196F3;
-                    border-radius: 5px;
-                    padding: 5px;
+                    background-color: #E8F4FD;
+                    border: 2px solid #2B7FD8;
+                    border-radius: 10px;
+                    padding: 8px;
                 }
             """)
         else:
             self.setStyleSheet("""
                 ItemCard {
                     background-color: white;
-                    border: 1px solid #e0e0e0;
-                    border-radius: 5px;
-                    padding: 5px;
+                    border: 1px solid #E5E5E5;
+                    border-radius: 10px;
+                    padding: 8px;
                 }
                 ItemCard:hover {
-                    background-color: #f5f5f5;
-                    border-color: #bdbdbd;
+                    background-color: #F9F9F9;
+                    border-color: #2B7FD8;
+                    border-width: 1px;
                 }
             """)
     

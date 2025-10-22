@@ -5,7 +5,7 @@ import os
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QTabWidget, QLabel,
     QCheckBox, QPushButton, QLineEdit, QSpinBox, QMessageBox,
-    QGroupBox, QFormLayout
+    QGroupBox, QFormLayout, QScrollArea
 )
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QFont
@@ -14,6 +14,7 @@ from PyQt5.QtGui import QFont
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from models.config import Config
 from utils.autostart import AutoStartManager
+from version import __version__, APP_NAME
 
 
 class SettingsWindow(QWidget):
@@ -44,17 +45,73 @@ class SettingsWindow(QWidget):
     def _init_ui(self):
         """Initialize the user interface."""
         # Window properties
-        self.setWindowTitle("Settings - Clipboard Manager")
-        self.setFixedSize(500, 500)
-        # Set window to always-on-top so it appears above the main window
-        self.setWindowFlags(Qt.Window | Qt.WindowStaysOnTopHint)
+        self.setWindowTitle("Settings")
+        self.setFixedSize(600, 550)
+        
+        # Frameless window with rounded corners
+        self.setWindowFlags(
+            Qt.Window | 
+            Qt.WindowStaysOnTopHint |
+            Qt.FramelessWindowHint
+        )
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        
+        # Main container
+        main_container = QWidget()
+        main_container.setObjectName("mainContainer")
+        main_container.setStyleSheet("""
+            #mainContainer {
+                background-color: #F3F3F3;
+                border-radius: 12px;
+                border: 1px solid rgba(0, 0, 0, 0.1);
+            }
+        """)
         
         # Main layout
-        main_layout = QVBoxLayout()
-        main_layout.setContentsMargins(10, 10, 10, 10)
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
         
-        # Tab widget
+        # Title bar
+        title_bar = self._create_title_bar()
+        layout.addWidget(title_bar)
+        
+        # Content area
+        content_widget = QWidget()
+        content_layout = QVBoxLayout()
+        content_layout.setContentsMargins(20, 15, 20, 20)
+        content_layout.setSpacing(15)
+        
+        # Tab widget with modern style
         self.tab_widget = QTabWidget()
+        self.tab_widget.setStyleSheet("""
+            QTabWidget::pane {
+                border: none;
+                background-color: white;
+                border-radius: 8px;
+                padding: 15px;
+            }
+            QTabBar::tab {
+                background-color: transparent;
+                color: #666666;
+                padding: 10px 30px;
+                margin-right: 5px;
+                border: none;
+                border-top-left-radius: 6px;
+                border-top-right-radius: 6px;
+                font-family: 'Segoe UI', sans-serif;
+                font-size: 13px;
+                min-width: 80px;
+            }
+            QTabBar::tab:selected {
+                background-color: white;
+                color: #2B7FD8;
+                font-weight: 600;
+            }
+            QTabBar::tab:hover:!selected {
+                background-color: rgba(255, 255, 255, 0.5);
+            }
+        """)
         
         # Create tabs
         self.general_tab = self._create_general_tab()
@@ -68,92 +125,313 @@ class SettingsWindow(QWidget):
         self.tab_widget.addTab(self.storage_tab, "Storage")
         self.tab_widget.addTab(self.about_tab, "About")
         
-        main_layout.addWidget(self.tab_widget)
+        content_layout.addWidget(self.tab_widget)
         
         # Button layout
         button_layout = QHBoxLayout()
+        button_layout.setSpacing(10)
         button_layout.addStretch()
-        
-        # Save button
-        self.save_button = QPushButton("Save")
-        self.save_button.clicked.connect(self._on_save_clicked)
-        self.save_button.setStyleSheet("""
-            QPushButton {
-                padding: 8px 20px;
-                background-color: #4CAF50;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                font-size: 14px;
-            }
-            QPushButton:hover {
-                background-color: #45a049;
-            }
-        """)
-        button_layout.addWidget(self.save_button)
         
         # Cancel button
         self.cancel_button = QPushButton("Cancel")
         self.cancel_button.clicked.connect(self.close)
+        self.cancel_button.setFixedHeight(40)
+        self.cancel_button.setCursor(Qt.PointingHandCursor)
         self.cancel_button.setStyleSheet("""
             QPushButton {
-                padding: 8px 20px;
-                background-color: #f44336;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                font-size: 14px;
+                padding: 10px 25px;
+                background-color: white;
+                color: #666666;
+                border: 1px solid #E0E0E0;
+                border-radius: 8px;
+                font-size: 13px;
+                font-family: 'Segoe UI', sans-serif;
+                font-weight: 600;
             }
             QPushButton:hover {
-                background-color: #da190b;
+                background-color: #F5F5F5;
+                border-color: #CCCCCC;
+            }
+            QPushButton:pressed {
+                background-color: #EEEEEE;
             }
         """)
         button_layout.addWidget(self.cancel_button)
         
-        main_layout.addLayout(button_layout)
+        # Save button
+        self.save_button = QPushButton("Save Changes")
+        self.save_button.clicked.connect(self._on_save_clicked)
+        self.save_button.setFixedHeight(40)
+        self.save_button.setCursor(Qt.PointingHandCursor)
+        self.save_button.setStyleSheet("""
+            QPushButton {
+                padding: 10px 25px;
+                background-color: #2B7FD8;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-size: 13px;
+                font-family: 'Segoe UI', sans-serif;
+                font-weight: 600;
+            }
+            QPushButton:hover {
+                background-color: #2470C7;
+            }
+            QPushButton:pressed {
+                background-color: #1E5FB8;
+            }
+        """)
+        button_layout.addWidget(self.save_button)
         
-        self.setLayout(main_layout)
+        content_layout.addLayout(button_layout)
+        
+        content_widget.setLayout(content_layout)
+        layout.addWidget(content_widget)
+        
+        main_container.setLayout(layout)
+        
+        # Set main container
+        container_layout = QVBoxLayout()
+        container_layout.setContentsMargins(0, 0, 0, 0)
+        container_layout.addWidget(main_container)
+        self.setLayout(container_layout)
+        
+        # Enable mouse tracking for dragging
+        self.mouse_pressed = False
+        self.mouse_pos = None
+    
+    def _create_title_bar(self):
+        """Create custom title bar."""
+        from PyQt5.QtGui import QPixmap
+        
+        title_bar = QWidget()
+        title_bar.setFixedHeight(45)
+        title_bar.setStyleSheet("""
+            QWidget {
+                background-color: #2B7FD8;
+                border-top-left-radius: 12px;
+                border-top-right-radius: 12px;
+            }
+        """)
+        
+        title_layout = QHBoxLayout()
+        title_layout.setContentsMargins(15, 0, 10, 0)
+        title_layout.setSpacing(10)
+        
+        # Settings icon
+        icon_label = QLabel("⚙️")
+        icon_label.setStyleSheet("""
+            QLabel {
+                font-size: 18px;
+                background: transparent;
+            }
+        """)
+        title_layout.addWidget(icon_label)
+        
+        # Title
+        title_label = QLabel("Settings")
+        title_label.setStyleSheet("""
+            QLabel {
+                color: white;
+                font-size: 14px;
+                font-family: 'Segoe UI', sans-serif;
+                font-weight: 600;
+                background: transparent;
+            }
+        """)
+        title_layout.addWidget(title_label)
+        
+        title_layout.addStretch()
+        
+        # Close button
+        close_button = QPushButton("✕")
+        close_button.setFixedSize(40, 30)
+        close_button.setCursor(Qt.PointingHandCursor)
+        close_button.clicked.connect(self.close)
+        close_button.setStyleSheet("""
+            QPushButton {
+                background-color: transparent;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                font-size: 16px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+            QPushButton:pressed {
+                background-color: rgba(255, 255, 255, 0.2);
+            }
+        """)
+        title_layout.addWidget(close_button)
+        
+        title_bar.setLayout(title_layout)
+        
+        # Make draggable
+        title_bar.mousePressEvent = self._title_bar_mouse_press
+        title_bar.mouseMoveEvent = self._title_bar_mouse_move
+        title_bar.mouseReleaseEvent = self._title_bar_mouse_release
+        
+        return title_bar
+    
+    def _title_bar_mouse_press(self, event):
+        """Handle mouse press on title bar."""
+        if event.button() == Qt.LeftButton:
+            self.mouse_pressed = True
+            self.mouse_pos = event.globalPos() - self.frameGeometry().topLeft()
+    
+    def _title_bar_mouse_move(self, event):
+        """Handle mouse move on title bar."""
+        if self.mouse_pressed:
+            self.move(event.globalPos() - self.mouse_pos)
+    
+    def _title_bar_mouse_release(self, event):
+        """Handle mouse release on title bar."""
+        self.mouse_pressed = False
     
     def _create_general_tab(self) -> QWidget:
         """Create the General settings tab."""
         tab = QWidget()
+        tab.setStyleSheet("background-color: transparent;")
         layout = QVBoxLayout()
-        layout.setContentsMargins(15, 15, 15, 15)
-        layout.setSpacing(15)
+        layout.setContentsMargins(0, 10, 0, 0)
+        layout.setSpacing(20)
         
         # Auto-start group
         autostart_group = QGroupBox("Startup")
+        autostart_group.setStyleSheet("""
+            QGroupBox {
+                font-family: 'Segoe UI', sans-serif;
+                font-size: 14px;
+                font-weight: 600;
+                color: #1F1F1F;
+                border: none;
+                margin-top: 10px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 0px;
+                padding: 0 5px 0 0;
+            }
+        """)
         autostart_layout = QVBoxLayout()
+        autostart_layout.setContentsMargins(0, 15, 0, 0)
         
         self.autostart_checkbox = QCheckBox("Launch on system startup")
+        self.autostart_checkbox.setStyleSheet("""
+            QCheckBox {
+                font-family: 'Segoe UI', sans-serif;
+                font-size: 13px;
+                color: #333333;
+                spacing: 8px;
+            }
+            QCheckBox::indicator {
+                width: 18px;
+                height: 18px;
+                border-radius: 4px;
+                border: 2px solid #CCCCCC;
+                background-color: white;
+            }
+            QCheckBox::indicator:hover {
+                border-color: #2B7FD8;
+            }
+            QCheckBox::indicator:checked {
+                background-color: #2B7FD8;
+                border-color: #2B7FD8;
+                image: url(none);
+            }
+        """)
         autostart_layout.addWidget(self.autostart_checkbox)
         
         autostart_group.setLayout(autostart_layout)
         layout.addWidget(autostart_group)
         
         # Hotkey group
-        hotkey_group = QGroupBox("Hotkey")
-        hotkey_layout = QFormLayout()
+        hotkey_group = QGroupBox("Global Hotkey")
+        hotkey_group.setStyleSheet("""
+            QGroupBox {
+                font-family: 'Segoe UI', sans-serif;
+                font-size: 14px;
+                font-weight: 600;
+                color: #1F1F1F;
+                border: none;
+                margin-top: 10px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 0px;
+                padding: 0 5px 0 0;
+            }
+        """)
+        hotkey_layout = QVBoxLayout()
+        hotkey_layout.setContentsMargins(0, 15, 0, 0)
+        hotkey_layout.setSpacing(10)
+        
+        hotkey_input_layout = QHBoxLayout()
+        hotkey_input_layout.setSpacing(10)
         
         self.hotkey_input = QLineEdit()
         self.hotkey_input.setPlaceholderText("e.g., ctrl+shift+v")
-        self.hotkey_input.setReadOnly(True)  # Will be editable via capture button
-        
-        hotkey_input_layout = QHBoxLayout()
+        self.hotkey_input.setReadOnly(True)
+        self.hotkey_input.setFixedHeight(36)
+        self.hotkey_input.setStyleSheet("""
+            QLineEdit {
+                padding: 8px 12px;
+                font-size: 13px;
+                font-family: 'Segoe UI', sans-serif;
+                background-color: #F9F9F9;
+                border: 1px solid #E0E0E0;
+                border-radius: 6px;
+                color: #1F1F1F;
+            }
+            QLineEdit:focus {
+                border: 2px solid #2B7FD8;
+                background-color: white;
+            }
+        """)
         hotkey_input_layout.addWidget(self.hotkey_input)
         
         self.capture_hotkey_button = QPushButton("Change")
         self.capture_hotkey_button.clicked.connect(self._on_capture_hotkey_clicked)
+        self.capture_hotkey_button.setFixedHeight(36)
+        self.capture_hotkey_button.setCursor(Qt.PointingHandCursor)
+        self.capture_hotkey_button.setStyleSheet("""
+            QPushButton {
+                padding: 8px 20px;
+                background-color: white;
+                color: #2B7FD8;
+                border: 1px solid #2B7FD8;
+                border-radius: 6px;
+                font-size: 13px;
+                font-family: 'Segoe UI', sans-serif;
+                font-weight: 600;
+            }
+            QPushButton:hover {
+                background-color: #E8F4FD;
+            }
+            QPushButton:pressed {
+                background-color: #D0E8FA;
+            }
+            QPushButton:disabled {
+                background-color: #F5F5F5;
+                color: #CCCCCC;
+                border-color: #E0E0E0;
+            }
+        """)
         hotkey_input_layout.addWidget(self.capture_hotkey_button)
         
-        hotkey_widget = QWidget()
-        hotkey_widget.setLayout(hotkey_input_layout)
-        
-        hotkey_layout.addRow("Global hotkey:", hotkey_widget)
+        hotkey_layout.addLayout(hotkey_input_layout)
         
         hotkey_help = QLabel("Press the button and then press your desired key combination")
-        hotkey_help.setStyleSheet("color: #666; font-size: 11px;")
-        hotkey_layout.addRow("", hotkey_help)
+        hotkey_help.setStyleSheet("""
+            QLabel {
+                color: #888888;
+                font-size: 11px;
+                font-family: 'Segoe UI', sans-serif;
+            }
+        """)
+        hotkey_layout.addWidget(hotkey_help)
         
         hotkey_group.setLayout(hotkey_layout)
         layout.addWidget(hotkey_group)
@@ -165,24 +443,68 @@ class SettingsWindow(QWidget):
     def _create_capture_tab(self) -> QWidget:
         """Create the Capture settings tab."""
         tab = QWidget()
+        tab.setStyleSheet("background-color: transparent;")
         layout = QVBoxLayout()
-        layout.setContentsMargins(15, 15, 15, 15)
-        layout.setSpacing(15)
+        layout.setContentsMargins(0, 10, 0, 0)
+        layout.setSpacing(20)
         
         # Content types group
         content_group = QGroupBox("Content Types to Capture")
+        content_group.setStyleSheet("""
+            QGroupBox {
+                font-family: 'Segoe UI', sans-serif;
+                font-size: 14px;
+                font-weight: 600;
+                color: #1F1F1F;
+                border: none;
+                margin-top: 10px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 0px;
+                padding: 0 5px 0 0;
+            }
+        """)
         content_layout = QVBoxLayout()
+        content_layout.setContentsMargins(0, 15, 0, 0)
+        content_layout.setSpacing(12)
+        
+        checkbox_style = """
+            QCheckBox {
+                font-family: 'Segoe UI', sans-serif;
+                font-size: 13px;
+                color: #333333;
+                spacing: 8px;
+            }
+            QCheckBox::indicator {
+                width: 18px;
+                height: 18px;
+                border-radius: 4px;
+                border: 2px solid #CCCCCC;
+                background-color: white;
+            }
+            QCheckBox::indicator:hover {
+                border-color: #2B7FD8;
+            }
+            QCheckBox::indicator:checked {
+                background-color: #2B7FD8;
+                border-color: #2B7FD8;
+            }
+        """
         
         self.capture_text_checkbox = QCheckBox("Text")
         self.capture_text_checkbox.setToolTip("Capture plain text from clipboard")
+        self.capture_text_checkbox.setStyleSheet(checkbox_style)
         content_layout.addWidget(self.capture_text_checkbox)
         
         self.capture_links_checkbox = QCheckBox("Links")
         self.capture_links_checkbox.setToolTip("Capture URLs and web links")
+        self.capture_links_checkbox.setStyleSheet(checkbox_style)
         content_layout.addWidget(self.capture_links_checkbox)
         
         self.capture_images_checkbox = QCheckBox("Images")
         self.capture_images_checkbox.setToolTip("Capture images from clipboard")
+        self.capture_images_checkbox.setStyleSheet(checkbox_style)
         content_layout.addWidget(self.capture_images_checkbox)
         
         content_group.setLayout(content_layout)
@@ -190,7 +512,16 @@ class SettingsWindow(QWidget):
         
         # Info label
         info_label = QLabel("Changes will be applied immediately")
-        info_label.setStyleSheet("color: #666; font-size: 11px; margin-top: 10px;")
+        info_label.setStyleSheet("""
+            QLabel {
+                color: #888888;
+                font-size: 11px;
+                font-family: 'Segoe UI', sans-serif;
+                padding: 10px;
+                background-color: #F9F9F9;
+                border-radius: 6px;
+            }
+        """)
         layout.addWidget(info_label)
         
         layout.addStretch()
@@ -200,51 +531,142 @@ class SettingsWindow(QWidget):
     def _create_storage_tab(self) -> QWidget:
         """Create the Storage settings tab."""
         tab = QWidget()
+        tab.setStyleSheet("background-color: transparent;")
         layout = QVBoxLayout()
-        layout.setContentsMargins(15, 15, 15, 15)
-        layout.setSpacing(15)
+        layout.setContentsMargins(0, 10, 0, 0)
+        layout.setSpacing(20)
         
         # Storage limit group
         limit_group = QGroupBox("Storage Limit")
-        limit_layout = QFormLayout()
+        limit_group.setStyleSheet("""
+            QGroupBox {
+                font-family: 'Segoe UI', sans-serif;
+                font-size: 14px;
+                font-weight: 600;
+                color: #1F1F1F;
+                border: none;
+                margin-top: 10px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 0px;
+                padding: 0 5px 0 0;
+            }
+        """)
+        limit_layout = QVBoxLayout()
+        limit_layout.setContentsMargins(0, 15, 0, 0)
+        limit_layout.setSpacing(10)
+        
+        limit_label = QLabel("Maximum items:")
+        limit_label.setStyleSheet("""
+            QLabel {
+                font-family: 'Segoe UI', sans-serif;
+                font-size: 13px;
+                color: #333333;
+            }
+        """)
+        limit_layout.addWidget(limit_label)
         
         self.max_items_spinbox = QSpinBox()
         self.max_items_spinbox.setMinimum(10)
         self.max_items_spinbox.setMaximum(10000)
         self.max_items_spinbox.setSingleStep(100)
         self.max_items_spinbox.setSuffix(" items")
-        
-        limit_layout.addRow("Maximum items:", self.max_items_spinbox)
+        self.max_items_spinbox.setFixedHeight(36)
+        self.max_items_spinbox.setStyleSheet("""
+            QSpinBox {
+                padding: 8px 12px;
+                font-size: 13px;
+                font-family: 'Segoe UI', sans-serif;
+                background-color: white;
+                border: 1px solid #E0E0E0;
+                border-radius: 6px;
+                color: #1F1F1F;
+            }
+            QSpinBox:focus {
+                border: 2px solid #2B7FD8;
+            }
+            QSpinBox::up-button, QSpinBox::down-button {
+                width: 20px;
+                border-radius: 3px;
+            }
+            QSpinBox::up-button:hover, QSpinBox::down-button:hover {
+                background-color: #E8F4FD;
+            }
+        """)
+        limit_layout.addWidget(self.max_items_spinbox)
         
         limit_help = QLabel("Oldest items will be automatically deleted when limit is reached")
-        limit_help.setStyleSheet("color: #666; font-size: 11px;")
-        limit_layout.addRow("", limit_help)
+        limit_help.setStyleSheet("""
+            QLabel {
+                color: #888888;
+                font-size: 11px;
+                font-family: 'Segoe UI', sans-serif;
+            }
+        """)
+        limit_layout.addWidget(limit_help)
         
         limit_group.setLayout(limit_layout)
         layout.addWidget(limit_group)
         
         # Data management group
         data_group = QGroupBox("Data Management")
+        data_group.setStyleSheet("""
+            QGroupBox {
+                font-family: 'Segoe UI', sans-serif;
+                font-size: 14px;
+                font-weight: 600;
+                color: #1F1F1F;
+                border: none;
+                margin-top: 10px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 0px;
+                padding: 0 5px 0 0;
+            }
+        """)
         data_layout = QVBoxLayout()
+        data_layout.setContentsMargins(0, 15, 0, 0)
+        data_layout.setSpacing(10)
         
         self.clear_all_button = QPushButton("Clear All Data")
         self.clear_all_button.clicked.connect(self._on_clear_all_data_clicked)
+        self.clear_all_button.setFixedHeight(40)
+        self.clear_all_button.setCursor(Qt.PointingHandCursor)
         self.clear_all_button.setStyleSheet("""
             QPushButton {
-                padding: 8px 15px;
-                background-color: #f44336;
-                color: white;
-                border: none;
-                border-radius: 4px;
+                padding: 10px 20px;
+                background-color: white;
+                color: #D13438;
+                border: 1px solid #E0E0E0;
+                border-radius: 8px;
+                font-size: 13px;
+                font-family: 'Segoe UI', sans-serif;
+                font-weight: 600;
+                text-align: left;
             }
             QPushButton:hover {
-                background-color: #d32f2f;
+                background-color: #FFF4F4;
+                border-color: #D13438;
+            }
+            QPushButton:pressed {
+                background-color: #FFE6E6;
             }
         """)
         data_layout.addWidget(self.clear_all_button)
         
         clear_help = QLabel("This will permanently delete all clipboard history")
-        clear_help.setStyleSheet("color: #666; font-size: 11px;")
+        clear_help.setStyleSheet("""
+            QLabel {
+                color: #D13438;
+                font-size: 11px;
+                font-family: 'Segoe UI', sans-serif;
+                padding: 8px;
+                background-color: #FFF4F4;
+                border-radius: 6px;
+            }
+        """)
         data_layout.addWidget(clear_help)
         
         data_group.setLayout(data_layout)
@@ -257,59 +679,203 @@ class SettingsWindow(QWidget):
     def _create_about_tab(self) -> QWidget:
         """Create the About tab."""
         tab = QWidget()
+        tab.setStyleSheet("background-color: transparent;")
+        
+        # Create scroll area
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setFrameShape(QScrollArea.NoFrame)
+        scroll_area.setStyleSheet("""
+            QScrollArea {
+                background-color: transparent;
+                border: none;
+            }
+            QScrollBar:vertical {
+                background-color: transparent;
+                width: 8px;
+                margin: 0px;
+            }
+            QScrollBar::handle:vertical {
+                background-color: #CCCCCC;
+                border-radius: 4px;
+                min-height: 30px;
+            }
+            QScrollBar::handle:vertical:hover {
+                background-color: #2B7FD8;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                height: 0px;
+            }
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+                background: none;
+            }
+        """)
+        
+        # Content widget inside scroll area
+        content_widget = QWidget()
+        content_widget.setStyleSheet("background-color: transparent;")
         layout = QVBoxLayout()
-        layout.setContentsMargins(15, 15, 15, 15)
-        layout.setSpacing(20)
+        layout.setContentsMargins(10, 10, 10, 10)
+        layout.setSpacing(12)
         layout.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
+        
+        # App icon
+        from PyQt5.QtGui import QPixmap
+        icon_label = QLabel()
+        icon_label.setAlignment(Qt.AlignCenter)
+        
+        # Try to load clipboard.png
+        icon_paths = [
+            os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'assets', 'icons', 'clipboard.png'),
+            'assets/icons/clipboard.png',
+        ]
+        
+        icon_loaded = False
+        for icon_path in icon_paths:
+            if os.path.exists(icon_path):
+                pixmap = QPixmap(icon_path)
+                if not pixmap.isNull():
+                    scaled_pixmap = pixmap.scaled(64, 64, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                    icon_label.setPixmap(scaled_pixmap)
+                    icon_loaded = True
+                    break
+        
+        if not icon_loaded:
+            icon_label.setText("📋")
+            icon_label.setStyleSheet("font-size: 48px;")
+        
+        icon_label.setStyleSheet("""
+            QLabel {
+                margin-bottom: 10px;
+            }
+        """)
+        layout.addWidget(icon_label)
         
         # App name
         app_name = QLabel("Clipboard Manager")
         app_name.setAlignment(Qt.AlignCenter)
-        font = QFont()
-        font.setPointSize(18)
-        font.setBold(True)
-        app_name.setFont(font)
+        app_name.setStyleSheet("""
+            QLabel {
+                font-family: 'Segoe UI', sans-serif;
+                font-size: 24px;
+                font-weight: 600;
+                color: #1F1F1F;
+            }
+        """)
         layout.addWidget(app_name)
         
         # Version
-        version = QLabel("Version 1.0.0")
+        version = QLabel(f"Version {__version__}")
         version.setAlignment(Qt.AlignCenter)
-        version.setStyleSheet("color: #666; font-size: 14px;")
+        version.setStyleSheet("""
+            QLabel {
+                color: #888888;
+                font-size: 13px;
+                font-family: 'Segoe UI', sans-serif;
+                margin-bottom: 10px;
+            }
+        """)
         layout.addWidget(version)
         
         # Description
         description = QLabel(
-            "A cross-platform clipboard manager that captures and stores\n"
-            "clipboard history for easy access and reuse."
+            "A lightweight clipboard manager that saves your copy history and lets you reuse it anytime."
         )
         description.setAlignment(Qt.AlignCenter)
         description.setWordWrap(True)
-        description.setStyleSheet("margin-top: 20px; margin-bottom: 20px;")
+        description.setMaximumWidth(500)
+        description.setStyleSheet("""
+            QLabel {
+                color: #666666;
+                font-size: 12px;
+                font-family: 'Segoe UI', sans-serif;
+                margin: 10px 20px;
+            }
+        """)
         layout.addWidget(description)
         
-        # Features
-        features_label = QLabel("Features:")
-        features_label.setStyleSheet("font-weight: bold; margin-top: 10px;")
-        layout.addWidget(features_label)
+        # Features box with scroll
+        features_box = QWidget()
+        features_box.setObjectName("featuresBox")
+        features_box.setMaximumWidth(500)
+        features_box.setStyleSheet("""
+            #featuresBox {
+                background-color: #F9F9F9;
+                border-radius: 8px;
+            }
+        """)
+        features_layout = QVBoxLayout()
+        features_layout.setContentsMargins(12, 12, 12, 12)
+        features_layout.setSpacing(8)
         
-        features = QLabel(
-            "• Automatic clipboard monitoring\n"
-            "• Support for text, links, and images\n"
-            "• Fast search functionality\n"
-            "• Global hotkey access\n"
-            "• Cross-platform (Windows & Linux)"
-        )
-        features.setStyleSheet("margin-left: 20px;")
-        layout.addWidget(features)
+        features_title = QLabel("Features")
+        features_title.setStyleSheet("""
+            QLabel {
+                font-family: 'Segoe UI', sans-serif;
+                font-size: 12px;
+                font-weight: 600;
+                color: #1F1F1F;
+                background: transparent;
+            }
+        """)
+        features_layout.addWidget(features_title)
+        
+        features_text = [
+            "• Automatic clipboard monitoring",
+            "• Text, links, and images support",
+            "• Fast search functionality",
+            "• Global hotkey (Ctrl+Shift+V)",
+            "• Cross-platform support",
+            "• 100% local storage",
+            "• Privacy-focused design",
+            "• Lightweight and fast",
+            "• Modern Windows 11 UI",
+            "• System tray integration",
+            "• Customizable settings",
+            "• Auto-start on system boot"
+        ]
+        
+        for feature in features_text:
+            feature_label = QLabel(feature)
+            feature_label.setStyleSheet("""
+                QLabel {
+                    color: #555555;
+                    font-size: 11px;
+                    font-family: 'Segoe UI', sans-serif;
+                    background: transparent;
+                    padding: 2px 0px;
+                }
+            """)
+            features_layout.addWidget(feature_label)
+        
+        features_box.setLayout(features_layout)
+        layout.addWidget(features_box)
         
         # License
         license_label = QLabel("License: MIT")
         license_label.setAlignment(Qt.AlignCenter)
-        license_label.setStyleSheet("color: #666; font-size: 11px; margin-top: 30px;")
+        license_label.setStyleSheet("""
+            QLabel {
+                color: #888888;
+                font-size: 11px;
+                font-family: 'Segoe UI', sans-serif;
+                margin-top: 15px;
+            }
+        """)
         layout.addWidget(license_label)
         
         layout.addStretch()
-        tab.setLayout(layout)
+        content_widget.setLayout(layout)
+        
+        # Set content widget to scroll area
+        scroll_area.setWidget(content_widget)
+        
+        # Main tab layout
+        tab_layout = QVBoxLayout()
+        tab_layout.setContentsMargins(0, 0, 0, 0)
+        tab_layout.addWidget(scroll_area)
+        tab.setLayout(tab_layout)
+        
         return tab
     
     def _load_settings(self):

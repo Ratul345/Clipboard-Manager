@@ -1,11 +1,11 @@
 """Main GUI window for Clipboard Manager."""
 
 from PyQt5.QtWidgets import (
-    QWidget, QVBoxLayout, QLineEdit, QListWidget, 
-    QPushButton, QMessageBox, QScrollArea, QListWidgetItem
+    QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QListWidget, 
+    QPushButton, QMessageBox, QScrollArea, QListWidgetItem, QLabel
 )
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QPixmap
 import sys
 import os
 
@@ -57,88 +57,306 @@ class MainWindow(QWidget):
         """Initialize the user interface components."""
         # Window properties
         self.setWindowTitle("Clipboard Manager")
-        self.setFixedSize(400, 600)
+        self.setFixedSize(450, 650)
         
         # Set window icon
         icon_path = self._get_icon_path()
         if os.path.exists(icon_path):
             self.setWindowIcon(QIcon(icon_path))
         
-        # Set window to always-on-top
+        # Set window to always-on-top with frameless for modern look
         self.setWindowFlags(
             Qt.Window | 
-            Qt.WindowStaysOnTopHint
+            Qt.WindowStaysOnTopHint |
+            Qt.FramelessWindowHint
         )
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        
+        # Main container with rounded corners
+        main_container = QWidget()
+        main_container.setObjectName("mainContainer")
+        main_container.setStyleSheet("""
+            #mainContainer {
+                background-color: #F3F3F3;
+                border-radius: 12px;
+                border: 1px solid rgba(0, 0, 0, 0.1);
+            }
+        """)
         
         # Main layout
         layout = QVBoxLayout()
-        layout.setContentsMargins(10, 10, 10, 10)
-        layout.setSpacing(10)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
         
-        # Search bar
+        # Title bar (custom for frameless window)
+        title_bar = self._create_title_bar()
+        layout.addWidget(title_bar)
+        
+        # Content area
+        content_widget = QWidget()
+        content_layout = QVBoxLayout()
+        content_layout.setContentsMargins(20, 15, 20, 20)
+        content_layout.setSpacing(12)
+        
+        # Search bar container
+        search_container = QWidget()
+        search_container.setFixedHeight(40)
+        search_layout = QHBoxLayout()
+        search_layout.setContentsMargins(0, 0, 0, 0)
+        search_layout.setSpacing(0)
+        
+        # Search bar with modern Windows 11 style
         self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText("🔍 Search clipboard history...")
+        self.search_input.setPlaceholderText("Search clipboard history...")
         self.search_input.textChanged.connect(self._on_search_changed)
+        self.search_input.setFixedHeight(40)
         self.search_input.setStyleSheet("""
             QLineEdit {
-                padding: 8px;
+                padding: 10px 15px 10px 45px;
                 font-size: 14px;
-                border: 2px solid #ccc;
-                border-radius: 5px;
+                font-family: 'Segoe UI', sans-serif;
+                background-color: white;
+                border: 1px solid #E0E0E0;
+                border-radius: 8px;
+                color: #1F1F1F;
+            }
+            QLineEdit:hover {
+                border: 1px solid #2B7FD8;
+                background-color: #FAFAFA;
             }
             QLineEdit:focus {
-                border-color: #4CAF50;
+                border: 2px solid #2B7FD8;
+                background-color: white;
             }
         """)
-        layout.addWidget(self.search_input)
+        
+        # Add search icon overlay
+        search_icon_label = QLabel("🔍", self.search_input)
+        search_icon_label.setStyleSheet("""
+            QLabel {
+                font-size: 16px;
+                padding: 0px;
+                background: transparent;
+                color: #666666;
+            }
+        """)
+        search_icon_label.setFixedSize(30, 40)
+        search_icon_label.setAlignment(Qt.AlignCenter)
+        search_icon_label.move(10, 0)
+        
+        search_layout.addWidget(self.search_input)
+        search_container.setLayout(search_layout)
+        content_layout.addWidget(search_container)
+        
+        # Items count label
+        self.items_count_label = QLabel("0 items")
+        self.items_count_label.setStyleSheet("""
+            QLabel {
+                color: #666666;
+                font-size: 12px;
+                font-family: 'Segoe UI', sans-serif;
+                padding: 5px 5px;
+            }
+        """)
+        content_layout.addWidget(self.items_count_label)
         
         # Scrollable list widget for clipboard items
         self.item_list = QListWidget()
         self.item_list.setStyleSheet("""
             QListWidget {
-                border: 1px solid #ddd;
-                border-radius: 5px;
-                background-color: #fafafa;
+                border: none;
+                border-radius: 8px;
+                background-color: transparent;
+                outline: none;
             }
             QListWidget::item {
-                padding: 10px;
-                border-bottom: 1px solid #eee;
+                padding: 0px;
+                margin-bottom: 8px;
+                border: none;
+                background-color: transparent;
             }
             QListWidget::item:selected {
-                background-color: #e3f2fd;
-                color: #000;
+                background-color: transparent;
             }
             QListWidget::item:hover {
-                background-color: #f5f5f5;
+                background-color: transparent;
+            }
+            QScrollBar:vertical {
+                border: none;
+                background: #F0F0F0;
+                width: 8px;
+                border-radius: 4px;
+                margin: 0px;
+            }
+            QScrollBar::handle:vertical {
+                background: #C0C0C0;
+                border-radius: 4px;
+                min-height: 20px;
+            }
+            QScrollBar::handle:vertical:hover {
+                background: #A0A0A0;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                height: 0px;
+            }
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+                background: none;
             }
         """)
         self.item_list.setVerticalScrollMode(QListWidget.ScrollPerPixel)
+        self.item_list.setSpacing(0)
         self.item_list.itemClicked.connect(self._on_item_clicked)
         self.item_list.itemDoubleClicked.connect(self._on_item_double_clicked)
-        layout.addWidget(self.item_list)
+        content_layout.addWidget(self.item_list)
         
-        # Clear All button
-        self.clear_all_button = QPushButton("Clear All")
+        # Clear All button with modern style
+        self.clear_all_button = QPushButton("Clear All History")
         self.clear_all_button.clicked.connect(self._on_clear_all_clicked)
+        self.clear_all_button.setFixedHeight(40)
+        self.clear_all_button.setCursor(Qt.PointingHandCursor)
         self.clear_all_button.setStyleSheet("""
             QPushButton {
-                padding: 10px;
-                font-size: 14px;
-                background-color: #f44336;
-                color: white;
-                border: none;
-                border-radius: 5px;
+                padding: 10px 20px;
+                font-size: 13px;
+                font-family: 'Segoe UI', sans-serif;
+                font-weight: 600;
+                background-color: #FFFFFF;
+                color: #D13438;
+                border: 1px solid #E0E0E0;
+                border-radius: 8px;
             }
             QPushButton:hover {
-                background-color: #d32f2f;
+                background-color: #FFF4F4;
+                border: 1px solid #D13438;
             }
             QPushButton:pressed {
-                background-color: #b71c1c;
+                background-color: #FFE6E6;
             }
         """)
-        layout.addWidget(self.clear_all_button)
+        content_layout.addWidget(self.clear_all_button)
         
-        self.setLayout(layout)
+        content_widget.setLayout(content_layout)
+        layout.addWidget(content_widget)
+        
+        main_container.setLayout(layout)
+        
+        # Set main container as central widget
+        container_layout = QVBoxLayout()
+        container_layout.setContentsMargins(0, 0, 0, 0)
+        container_layout.addWidget(main_container)
+        self.setLayout(container_layout)
+        
+        # Enable mouse tracking for custom title bar
+        self.mouse_pressed = False
+        self.mouse_pos = None
+    
+    def _create_title_bar(self):
+        """Create custom title bar for frameless window."""
+        title_bar = QWidget()
+        title_bar.setFixedHeight(45)
+        title_bar.setStyleSheet("""
+            QWidget {
+                background-color: #2B7FD8;
+                border-top-left-radius: 12px;
+                border-top-right-radius: 12px;
+            }
+        """)
+        
+        title_layout = QHBoxLayout()
+        title_layout.setContentsMargins(15, 0, 10, 0)
+        title_layout.setSpacing(10)
+        
+        # App icon
+        icon_label = QLabel()
+        # Try to load icon from assets
+        icon_paths = [
+            os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'assets', 'icons', 'clipboard.png'),
+            'assets/icons/clipboard.png',
+        ]
+        
+        icon_loaded = False
+        for icon_path in icon_paths:
+            if os.path.exists(icon_path):
+                pixmap = QPixmap(icon_path)
+                if not pixmap.isNull():
+                    scaled_pixmap = pixmap.scaled(24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                    icon_label.setPixmap(scaled_pixmap)
+                    icon_loaded = True
+                    break
+        
+        if not icon_loaded:
+            icon_label.setText("📋")
+            icon_label.setStyleSheet("font-size: 18px;")
+        
+        icon_label.setFixedSize(24, 24)
+        icon_label.setStyleSheet("""
+            QLabel {
+                background: transparent;
+            }
+        """)
+        title_layout.addWidget(icon_label)
+        
+        # Title
+        title_label = QLabel("Clipboard Manager")
+        title_label.setStyleSheet("""
+            QLabel {
+                color: white;
+                font-size: 14px;
+                font-family: 'Segoe UI', sans-serif;
+                font-weight: 600;
+                background: transparent;
+            }
+        """)
+        title_layout.addWidget(title_label)
+        
+        title_layout.addStretch()
+        
+        # Close button
+        close_button = QPushButton("✕")
+        close_button.setFixedSize(40, 30)
+        close_button.setCursor(Qt.PointingHandCursor)
+        close_button.clicked.connect(self.hide)
+        close_button.setStyleSheet("""
+            QPushButton {
+                background-color: transparent;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                font-size: 16px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+            QPushButton:pressed {
+                background-color: rgba(255, 255, 255, 0.2);
+            }
+        """)
+        title_layout.addWidget(close_button)
+        
+        title_bar.setLayout(title_layout)
+        
+        # Make title bar draggable
+        title_bar.mousePressEvent = self._title_bar_mouse_press
+        title_bar.mouseMoveEvent = self._title_bar_mouse_move
+        title_bar.mouseReleaseEvent = self._title_bar_mouse_release
+        
+        return title_bar
+    
+    def _title_bar_mouse_press(self, event):
+        """Handle mouse press on title bar."""
+        if event.button() == Qt.LeftButton:
+            self.mouse_pressed = True
+            self.mouse_pos = event.globalPos() - self.frameGeometry().topLeft()
+    
+    def _title_bar_mouse_move(self, event):
+        """Handle mouse move on title bar."""
+        if self.mouse_pressed:
+            self.move(event.globalPos() - self.mouse_pos)
+    
+    def _title_bar_mouse_release(self, event):
+        """Handle mouse release on title bar."""
+        self.mouse_pressed = False
     
     def _on_search_changed(self, text: str):
         """
@@ -325,6 +543,10 @@ class MainWindow(QWidget):
     def _refresh_item_list(self):
         """Refresh the item list display."""
         self.item_list.clear()
+        
+        # Update items count
+        count = len(self.filtered_items)
+        self.items_count_label.setText(f"{count} item{'s' if count != 1 else ''}")
         
         # Get current search query for highlighting
         search_query = self.search_input.text()

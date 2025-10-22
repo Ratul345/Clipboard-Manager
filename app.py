@@ -8,6 +8,7 @@ allowing users to search, browse, and reuse previously copied items.
 import sys
 import logging
 from PyQt5.QtWidgets import QApplication, QSystemTrayIcon
+from version import __version__, APP_NAME
 from utils.platform_utils import (
     get_operating_system,
     get_display_server,
@@ -87,7 +88,8 @@ class ClipboardManagerApp:
         
         # Initialize Qt application
         self.qt_app = QApplication(sys.argv)
-        self.qt_app.setApplicationName("Clipboard Manager")
+        self.qt_app.setApplicationName(APP_NAME)
+        self.qt_app.setApplicationVersion(__version__)
         self.qt_app.setQuitOnLastWindowClosed(False)  # Keep running in system tray
         
         # Set application icon
@@ -457,7 +459,7 @@ def main():
     # Setup logging
     logger = setup_logging()
     logger.info("=" * 60)
-    logger.info("Clipboard Manager Starting")
+    logger.info(f"{APP_NAME} v{__version__} Starting")
     logger.info("=" * 60)
     
     # Check platform compatibility

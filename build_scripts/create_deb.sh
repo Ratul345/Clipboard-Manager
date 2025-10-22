@@ -2,7 +2,8 @@
 # Script to create a .deb package for Debian/Ubuntu
 # Run this after building the Linux executable
 
-VERSION="1.0.0"
+# Get version from version.py
+VERSION=$(python3 -c "import sys; sys.path.insert(0, '..'); from version import __version__; print(__version__)")
 PACKAGE_NAME="clipboard-manager"
 ARCH="amd64"
 
