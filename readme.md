@@ -28,7 +28,7 @@ Think of it like "Clipper" or "Ditto," but cleaner and yours.
 
 #### Windows
 
-1. Download `ClipboardManager.exe` from the [Releases](https://github.com/yourusername/clipboard-manager/releases) page
+1. Download `ClipboardManager.exe` from the [Releases](https://github.com/Ratul345/Clipboard-Manager/releases) page
 2. Run the executable - no installation required!
 3. (Optional) Create a shortcut and place it in your Startup folder for auto-start
 
@@ -61,8 +61,8 @@ sudo cp clipboard-manager.desktop /usr/share/applications/
 #### 1. Clone the repository
 
 ```bash
-git clone <repository-url>
-cd clipboard-manager
+git clone https://github.com/Ratul345/Clipboard-Manager.git
+cd Clipboard-Manager
 ```
 
 #### 2. Create and activate virtual environment
@@ -358,7 +358,7 @@ If you encounter issues not listed here:
    - **Windows:** `%USERPROFILE%\.clipboard-manager\app.log`
    - **Linux:** `~/.clipboard-manager/app.log`
 
-2. Search existing [GitHub Issues](https://github.com/yourusername/clipboard-manager/issues)
+2. Search existing [GitHub Issues](https://github.com/Ratul345/Clipboard-Manager/issues)
 
 3. Create a new issue with:
    - Your operating system and version
