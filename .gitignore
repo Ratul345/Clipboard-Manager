@@ -75,6 +75,10 @@ desktop.ini
 # Icon generation script (development only)
 assets/icons/create_icons.py
 
+# Development/Release documentation (not needed in repo)
+PRE_PUBLISH_CHECKLIST.md
+GITHUB_RELEASE.md
+
 # Build artifacts
 *.exe
 *.deb
