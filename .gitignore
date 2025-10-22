@@ -1,0 +1,83 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual Environments
+myenv/
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Kiro IDE (development specs - not needed for open source users)
+.kiro/
+
+# Application Data (user-generated)
+data/
+logs/
+*.db
+*.log
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+.hypothesis/
+
+# Distribution / Packaging
+build/
+dist/
+*.egg-info/
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+.tox/
+.nox/
+coverage.xml
+*.cover
+.cache
+nosetests.xml
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+test_*.json
+test_*.db
+test_images/
+
+# OS specific
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Icon generation script (development only)
+assets/icons/create_icons.py
+
+# Build artifacts
+*.exe
+*.deb
+*.rpm
+*.dmg
+*.app
