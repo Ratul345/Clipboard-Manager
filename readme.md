@@ -1,7 +1,19 @@
-# Clipboard Manager
+<div align="center">
+  <img src="assets/icons/clipboard.png" alt="Clipboard Manager Logo" width="200"/>
+  
+  # Clipboard Manager
 
-Saves your copy history (texts, links, images) and lets you reuse them later.
-Think of it like "Clipper" or "Ditto," but cleaner and yours.
+  **Saves your copy history (texts, links, images) and lets you reuse them later.**
+  
+  Think of it like "Clipper" or "Ditto," but cleaner and yours.
+
+  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+  [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux-lightgrey)](https://github.com/Ratul345/Clipboard-Manager)
+  [![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)
+  
+</div>
+
+---
 
 ## Features
 
