@@ -62,6 +62,17 @@ Download `ClipboardManager-v1.0.0-Portable.exe` below - no installation required
 | **Escape** | Close window |
 | **Ctrl+F** | Focus search bar |
 
+## � SPrivacy & Security
+
+**Your data stays on YOUR computer!**
+
+- ✅ **100% Local Storage** - No cloud, no servers, no internet connection required
+- ✅ **No Data Collection** - We don't track, collect, or send any data
+- ✅ **Private by Default** - Each user has their own separate clipboard history
+- ✅ **Offline First** - Works completely offline
+
+Your clipboard history is stored locally in `~/.clipboard-manager/` and never leaves your computer.
+
 ## 📋 System Requirements
 
 - **Windows:** Windows 10 or later
