@@ -3,9 +3,9 @@
   
   # Clipboard Manager
 
-  **Saves your copy history (texts, links, images) and lets you reuse them later.**
+  **A lightweight clipboard manager that saves your copy history and lets you reuse it anytime.**
   
-  Think of it like "Clipper" or "Ditto," but cleaner and yours.
+  Never lose what you copied again!
 
   [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
   [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux-lightgrey)](https://github.com/Ratul345/Clipboard-Manager)
