@@ -7,6 +7,7 @@
   
   Never lose what you copied again!
 
+  [![Version](https://img.shields.io/badge/Version-1.1.0-brightgreen.svg)](https://github.com/Ratul345/Clipboard-Manager/releases)
   [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
   [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux-lightgrey)](https://github.com/Ratul345/Clipboard-Manager)
   [![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)
