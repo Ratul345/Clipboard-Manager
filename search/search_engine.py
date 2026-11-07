@@ -1,6 +1,7 @@
 """SearchEngine for filtering and highlighting clipboard items."""
 
 from typing import List, Tuple
+import html
 import re
 import sys
 import os
@@ -78,6 +79,44 @@ class SearchEngine:
         
         return highlighted
     
+    def highlight_html(self, text: str, query: str,
+                       start_tag: str = '<mark>',
+                       end_tag: str = '</mark>') -> str:
+        """
+        Return HTML-safe text with query matches wrapped in highlight tags.
+
+        Unlike highlight_matches, every part of the copied text is HTML-escaped,
+        so clipboard content such as "<b>x</b>" is shown literally when the
+        result is rendered in a rich text label. Newlines become <br>.
+
+        Args:
+            text: Text to escape and highlight
+            query: Search query to highlight (may be empty)
+            start_tag: Opening tag for highlighting
+            end_tag: Closing tag for highlighting
+
+        Returns:
+            Escaped HTML string
+        """
+        if not text:
+            return ''
+
+        def esc(part: str) -> str:
+            return html.escape(part, quote=False).replace('\n', '<br>')
+
+        if not query or not query.strip():
+            return esc(text)
+
+        pattern = re.compile(re.escape(query), re.IGNORECASE)
+        pieces = []
+        last = 0
+        for match in pattern.finditer(text):
+            pieces.append(esc(text[last:match.start()]))
+            pieces.append(f'{start_tag}{esc(match.group(0))}{end_tag}')
+            last = match.end()
+        pieces.append(esc(text[last:]))
+        return ''.join(pieces)
+
     def get_match_positions(self, text: str, query: str) -> List[Tuple[int, int]]:
         """
         Get positions of all matches in text.

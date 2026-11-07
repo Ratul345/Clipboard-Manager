@@ -7,6 +7,7 @@ allowing users to search, browse, and reuse previously copied items.
 
 import sys
 import logging
+from PyQt5.QtCore import QObject, pyqtSignal
 from PyQt5.QtWidgets import QApplication, QSystemTrayIcon
 from version import __version__, APP_NAME
 from utils.platform_utils import (
@@ -17,6 +18,18 @@ from utils.platform_utils import (
     is_windows,
     is_linux
 )
+
+
+class ThreadBridge(QObject):
+    """Moves events from background threads onto the Qt GUI thread.
+
+    The clipboard monitor and the global hotkey library both call back from
+    their own threads. Qt widgets may only be touched from the GUI thread, so
+    those callbacks emit these signals instead (queued delivery is automatic
+    because this object lives in the GUI thread).
+    """
+    hotkey_pressed = pyqtSignal()
+    item_added = pyqtSignal()
 
 
 def setup_logging():
@@ -73,6 +86,8 @@ class ClipboardManagerApp:
         self.config_manager = None
         self.settings_window = None
         self.autostart_manager = None
+        self._bridge = None
+        self._shutdown_done = False
     
     def initialize(self):
         """Initialize all application components."""
@@ -91,6 +106,11 @@ class ClipboardManagerApp:
         self.qt_app.setApplicationName(APP_NAME)
         self.qt_app.setApplicationVersion(__version__)
         self.qt_app.setQuitOnLastWindowClosed(False)  # Keep running in system tray
+        self._bridge = ThreadBridge()
+        self._bridge.hotkey_pressed.connect(self._on_hotkey_pressed)
+        
+        from ui.theme import ui_font
+        self.qt_app.setFont(ui_font(13))
         
         # Set application icon
         self._set_application_icon()
@@ -122,7 +142,11 @@ class ClipboardManagerApp:
             self.logger.info("Search engine initialized")
             
             from ui.main_window import MainWindow
-            self.main_window = MainWindow(self.storage_manager, self.search_engine)
+            from ui.theme import resolve_theme
+            theme = resolve_theme(self.config_manager.get('theme', 'light'))
+            self.main_window = MainWindow(self.storage_manager, self.search_engine, theme)
+            self.main_window.settings_requested.connect(self._on_tray_settings_requested)
+            self._bridge.item_added.connect(self.main_window.refresh_items)
             self.logger.info("Main window initialized")
         except Exception as e:
             self.logger.error(f"Failed to initialize UI components: {e}")
@@ -141,6 +165,10 @@ class ClipboardManagerApp:
                 capture_text=capture_text,
                 capture_images=capture_images,
                 capture_links=capture_links
+            )
+            # The monitor thread reports new items; the bridge hands them to the GUI thread
+            self.clipboard_service.set_item_added_callback(
+                lambda _item: self._bridge.item_added.emit()
             )
             self.logger.info("Clipboard service initialized")
         except Exception as e:
@@ -258,6 +286,13 @@ class ClipboardManagerApp:
         self.settings_window.capture_settings_changed.connect(self._on_capture_settings_changed)
         self.settings_window.storage_limit_changed.connect(self._on_storage_limit_changed)
         self.settings_window.clear_all_requested.connect(self._on_clear_all_requested)
+        self.settings_window.settings_changed.connect(self._on_settings_changed)
+    
+    def _on_settings_changed(self, settings: dict):
+        """Apply appearance changes to the history window right away."""
+        from ui.theme import resolve_theme
+        if self.main_window:
+            self.main_window.set_theme(resolve_theme(settings.get('theme', 'light')))
     
     def _on_hotkey_changed(self, new_hotkey: str):
         """Handle hotkey change from settings."""
@@ -319,6 +354,8 @@ class ClipboardManagerApp:
                     self.system_tray.set_window_state(False)
             else:
                 self.main_window.show()
+                self.main_window.raise_()
+                self.main_window.activateWindow()
                 if self.system_tray:
                     self.system_tray.set_window_state(True)
     
@@ -347,7 +384,8 @@ class ClipboardManagerApp:
         hotkey = self.config_manager.get('hotkey', 'ctrl+shift+v')
         
         # Register hotkey with toggle window callback
-        success = self.hotkey_handler.register_hotkey(hotkey, self._on_hotkey_pressed)
+        # The hotkey library calls back from its own thread; the signal moves it to the GUI thread
+        success = self.hotkey_handler.register_hotkey(hotkey, self._bridge.hotkey_pressed.emit)
         
         if success:
             self.logger.info(f"Global hotkey registered: {hotkey}")
@@ -421,6 +459,9 @@ class ClipboardManagerApp:
     
     def shutdown(self):
         """Perform graceful shutdown of all components."""
+        if self._shutdown_done:
+            return
+        self._shutdown_done = True
         self.logger.info("Shutting down Clipboard Manager...")
         
         try:

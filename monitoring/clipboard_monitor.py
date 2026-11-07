@@ -1,5 +1,6 @@
 """Base ClipboardMonitor class for detecting clipboard changes."""
 
+import hashlib
 import threading
 import time
 import logging
@@ -156,12 +157,24 @@ class ClipboardMonitor(ABC):
             current_hash = hash(content)
             if current_hash != self._last_content_hash:
                 return True
-        # For images, always consider as changed if we got new image data
+        # For images, compare a cheap fingerprint so an image that simply stays on
+        # the clipboard is not re-encoded and re-processed on every poll
         elif content_type == 'image':
-            # Image comparison is more complex, for now treat each capture as new
-            return True
-        
+            fingerprint = self._image_fingerprint(content)
+            if fingerprint is None:
+                return True
+            return fingerprint != self._last_content_hash
+
         return False
+
+    @staticmethod
+    def _image_fingerprint(image: Any) -> Optional[str]:
+        """Return a hash of the image pixels, or None if it cannot be computed."""
+        try:
+            data = image.tobytes() + repr((image.size, image.mode)).encode('utf-8')
+            return hashlib.md5(data).hexdigest()
+        except Exception:
+            return None
     
     def _update_last_content(self, content: Any, content_type: str) -> None:
         """
@@ -175,9 +188,9 @@ class ClipboardMonitor(ABC):
             self._last_content = content
             self._last_content_hash = hash(content)
         elif content_type == 'image':
-            # For images, we don't store the full content in memory
+            # For images, we don't store the full content in memory, only a fingerprint
             self._last_content = None
-            self._last_content_hash = None
+            self._last_content_hash = self._image_fingerprint(content)
     
     def is_monitoring(self) -> bool:
         """
