@@ -2,7 +2,7 @@
 
 import logging
 import hashlib
-from typing import Optional
+from typing import Callable, Optional
 from pathlib import Path
 from datetime import datetime
 
@@ -51,7 +51,8 @@ class ClipboardService:
         self.max_items = max_items
         self.monitor: Optional[object] = None
         self._last_content_hash: Optional[str] = None
-        
+        self._item_added_callback: Optional[Callable[[ClipboardItem], None]] = None
+
         # Capture filters
         self.capture_text = capture_text
         self.capture_images = capture_images
@@ -143,24 +144,62 @@ class ClipboardService:
                 self.logger.debug(f"Content type {refined_type} is disabled, skipping")
                 return
             
+            # Re-copying something that is already in the history (for example by
+            # picking it from the window) moves it to the top instead of adding a copy
+            existing = self._find_existing_item(content, refined_type)
+            if existing is not None:
+                self.storage_manager.touch_item(existing.id)
+                self.logger.debug("Content already in history, moved to top")
+                self._notify_item_added(existing)
+                return
+
             # Create clipboard item
             clipboard_item = self._create_clipboard_item(content, refined_type)
-            
+
             if not clipboard_item:
                 self.logger.warning("Failed to create clipboard item")
                 return
-            
+
             # Save to storage
             if self.storage_manager.save_item(clipboard_item):
                 self.logger.info(f"Saved clipboard item: {refined_type}")
-                
+
                 # Enforce storage limit
                 self._enforce_storage_limit()
+                self._notify_item_added(clipboard_item)
             else:
                 self.logger.error("Failed to save clipboard item")
-        
+
         except Exception as e:
             self.logger.error(f"Error processing clipboard change: {e}")
+
+    def set_item_added_callback(self, callback: Optional[Callable[[ClipboardItem], None]]) -> None:
+        """
+        Register a callback invoked after an item is saved or bumped to the top.
+
+        The callback runs on the clipboard monitor thread, so UI code must hand
+        the work over to the UI thread (for example with a Qt signal).
+        """
+        self._item_added_callback = callback
+
+    def _notify_item_added(self, item: ClipboardItem) -> None:
+        callback = self._item_added_callback
+        if callback is None:
+            return
+        try:
+            callback(item)
+        except Exception as e:
+            self.logger.error(f"Error in item-added callback: {e}")
+
+    def _find_existing_item(self, content, content_type: str) -> Optional[ClipboardItem]:
+        """Look up an identical item already stored in the history."""
+        if content_type in ('text', 'link') and isinstance(content, str):
+            return self.storage_manager.find_by_content(content_type, content)
+        if content_type == 'image' and PIL_AVAILABLE and isinstance(content, Image.Image):
+            image_hash = self._generate_content_hash(content, 'image')
+            if image_hash:
+                return self.storage_manager.find_image_by_hash(image_hash)
+        return None
     
     def _is_duplicate(self, content, content_type: str) -> bool:
         """
@@ -229,21 +268,25 @@ class ClipboardService:
             return 'image'
         
         if initial_type in ('text', 'link') and isinstance(content, str):
-            # Check if it's a link
-            content_stripped = content.strip()
-            if content_stripped.startswith(('http://', 'https://', 'ftp://', 'ftps://')):
+            if self.looks_like_link(content):
                 return 'link'
-            
-            # Check if it looks like a URL without scheme
-            if ('.' in content_stripped and 
-                ' ' not in content_stripped and 
-                '\n' not in content_stripped and
-                len(content_stripped) < 500):
-                # Simple heuristic for URLs
-                if content_stripped.count('.') <= 10:
-                    return 'link'
-        
+
         return 'text'
+
+    @staticmethod
+    def looks_like_link(text: str) -> bool:
+        """
+        Decide whether copied text is a URL.
+
+        Only text that starts with a URL scheme or "www." counts. The old
+        "contains a dot and no spaces" rule misclassified file names such as
+        "main.py" and numbers such as "3.14" as links.
+        """
+        stripped = text.strip()
+        if not stripped or len(stripped) > 2000 or any(ch.isspace() for ch in stripped):
+            return False
+        lowered = stripped.lower()
+        return lowered.startswith(('http://', 'https://', 'ftp://', 'ftps://', 'www.'))
     
     def _create_clipboard_item(self, content, content_type: str) -> Optional[ClipboardItem]:
         """

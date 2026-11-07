@@ -1,5 +1,33 @@
 # Clipboard Manager - Release Notes
 
+## Version 1.2.0 - Pinning, Filters, Dark Mode and Bug Fixes
+
+### New
+- **Pin items** - Pin from the card or with Ctrl+P. Pinned items stay at the top, are never removed by the history limit and survive "Clear history".
+- **Filter chips** - All, Text, Links, Images and Pinned.
+- **Dark mode** - Light, Dark or System, chosen in Settings and applied immediately.
+- **Image thumbnails** in the list, and images can now be copied back to the clipboard.
+- **Live updates** - the open window refreshes when something new is copied.
+
+### Redesign
+- New design system (colour tokens, drawn vector icons, consistent spacing) used by every window.
+- Cleaner header, search field with leading icon, empty states and a keyboard hint footer.
+- Settings rebuilt with grouped cards and toggle switches.
+- Window opens centred on the screen that holds the mouse cursor and is dragged with the native window mover (works on Wayland).
+
+### Fixed
+- Copied **images were never saved** (a crash when building the preview, and the image saver rejected the data the monitors provide).
+- Re-copying something from history **created a duplicate**; it now just moves to the top, and the move is saved.
+- Search highlighting rendered clipboard text as HTML (for example `<b>x</b>`); text is now escaped.
+- File names and numbers such as `main.py` or `3.14` were classified as links.
+- Global hotkey callback ran on a background thread and touched Qt widgets; it now hands over to the GUI thread.
+- Deleting items or reaching the history limit left image files on disk.
+- Images on the clipboard were re-encoded on every poll, wasting CPU.
+- Search treated `%` and `_` as wildcards.
+- Quitting from the tray ran shutdown twice.
+
+---
+
 ## Version 1.1.0 - UI Redesign
 
 **Release Date:** October 23, 2025

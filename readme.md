@@ -7,7 +7,7 @@
   
   Never lose what you copied again!
 
-  [![Version](https://img.shields.io/badge/Version-1.1.0-brightgreen.svg)](https://github.com/Ratul345/Clipboard-Manager/releases)
+  [![Version](https://img.shields.io/badge/Version-1.2.0-brightgreen.svg)](https://github.com/Ratul345/Clipboard-Manager/releases)
   [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
   [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux-lightgrey)](https://github.com/Ratul345/Clipboard-Manager)
   [![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)
@@ -22,7 +22,8 @@
 - 🔍 **Fast Search** - Quickly find items with real-time search filtering
 - 🖼️ **Image Support** - Stores and displays copied images
 - 🔗 **Smart Link Detection** - Automatically identifies and highlights URLs
-- 🎨 **Clean UI** - Modern, intuitive interface with item cards
+- 📌 **Pin & Filter** - Pin important items to the top (never auto-deleted) and filter by Text, Links, Images or Pinned
+- 🎨 **Clean UI** - Modern interface with light, dark and system themes
 - 🔔 **System Tray Integration** - Runs quietly in the background
 - ⌨️ **Keyboard Navigation** - Arrow keys, Enter, Delete, and Escape shortcuts
 - 🗑️ **Easy Management** - Delete individual items or clear all history
@@ -117,7 +118,8 @@ python app.py
 | **Enter** | Copy selected item to clipboard and close window |
 | **Delete** | Remove selected item from history |
 | **Escape** | Close window (app continues running in background) |
-| **Ctrl+F** | Focus search bar |
+| **Ctrl+P** | Pin / unpin the selected item |
+| **Type anywhere** | Search is focused as soon as the window opens |
 
 ### System Tray Menu
 
@@ -197,7 +199,7 @@ Clipboard Manager/
 python -m pytest
 
 # Run specific test file
-python -m pytest tests/test_storage.py
+python tests/test_core.py -v        # core logic (no GUI needed)
 
 # Run with coverage
 python -m pytest --cov=. --cov-report=html
@@ -251,7 +253,7 @@ Access settings by right-clicking the system tray icon and selecting "Settings".
 
 - **Launch on Startup** - Automatically start when your computer boots
 - **Global Hotkey** - Customize the keyboard shortcut (default: Ctrl+Shift+V)
-- **Theme** - Choose between light and dark mode
+- **Theme** - Light, dark, or follow the system
 
 ### Capture Settings
 
@@ -262,8 +264,9 @@ Toggle what types of content to capture:
 
 ### Storage Settings
 
-- **Max Items** - Limit clipboard history (default: 1000 items)
-- **Clear All Data** - Remove all stored clipboard items and images
+- **Max Items** - Limit clipboard history (default: 1000 items). Pinned items are never removed
+- **Delete everything** - Remove all stored clipboard items and images, including pinned ones
+- The **Clear history** button in the main window keeps pinned items
 
 ## Troubleshooting
 

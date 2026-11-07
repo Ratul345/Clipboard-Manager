@@ -128,7 +128,7 @@ class Config:
         if key == 'max_items':
             return isinstance(value, int) and value > 0 and value <= 10000
         elif key == 'theme':
-            return value in ('light', 'dark')
+            return value in ('light', 'dark', 'system')
         elif key == 'hotkey':
             return isinstance(value, str) and len(value) > 0
         elif key in ('auto_start', 'capture_text', 'capture_images', 'capture_links'):

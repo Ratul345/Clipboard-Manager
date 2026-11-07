@@ -29,14 +29,14 @@ class ImageStorage:
         """Create storage directory if it doesn't exist."""
         self.storage_dir.mkdir(parents=True, exist_ok=True)
     
-    def save_image(self, image_data: bytes, item_id: Optional[int] = None) -> Optional[str]:
+    def save_image(self, image_data, item_id: Optional[int] = None) -> Optional[str]:
         """
         Save image data to file with timestamp-based filename.
-        
+
         Args:
-            image_data: Raw image bytes
+            image_data: Raw image bytes or a PIL Image
             item_id: Optional item ID to include in filename
-            
+
         Returns:
             Path to saved image file, or None if failed
         """
@@ -47,13 +47,20 @@ class ImageStorage:
                 filename = f"{timestamp}_{item_id}.png"
             else:
                 filename = f"{timestamp}.png"
-            
+
             filepath = self.storage_dir / filename
-            
-            # Save image using PIL to ensure proper format
-            image = Image.open(io.BytesIO(image_data))
+
+            # Accept both a PIL Image (what the clipboard monitors produce) and raw bytes
+            if isinstance(image_data, Image.Image):
+                image = image_data
+            else:
+                image = Image.open(io.BytesIO(image_data))
+
+            # PNG cannot store some modes (e.g. CMYK, palette with odd transparency)
+            if image.mode not in ('RGB', 'RGBA', 'L', 'LA', 'P'):
+                image = image.convert('RGBA')
             image.save(filepath, 'PNG')
-            
+
             return str(filepath)
         except Exception:
             return None
